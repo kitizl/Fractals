@@ -9,6 +9,9 @@ This is primarily an educational tool, mostly for myself, to explore the generat
 
 There's a lot of stuff left to do.
 
+## KNOWN ISSUES
+- [ ] Algorithm breaks for non-square aspect ratios. Isn't a big enough deal right now for me to work on it.
+
 ## TODO
 
 - [ ] Change backend from Matplotlib to Pillow to directly draw onto a Canvas
