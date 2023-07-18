@@ -1,6 +1,11 @@
 import numpy as np
-import matplotlib.pyplot as plt
+from PIL import Image
 import time
+
+MAX_ITER = 10000
+WIDTH = 100
+HEIGHT = WIDTH
+
 
 class Pixel:
     """
@@ -30,11 +35,11 @@ def optimized_escape_time_alogrithm(x_width, y_width):
 		x = 0
 		y = 0
 		iteration = 0
-		max_iter = 1000
+		MAX_ITER = 1000
 
 		x2 = 0
 		y2 = 0
-		while ((x2 + y2 <= 4) and (iteration < max_iter)):
+		while ((x2 + y2 <= 4) and (iteration < MAX_ITER)):
 			y = 2 * x * y + y0
 			x = x2 - y2 + x0
 			x2 = x * x
@@ -45,15 +50,45 @@ def optimized_escape_time_alogrithm(x_width, y_width):
 	pixel_color = [pixel.color for pixel in screen]
 	reshaped_screen = np.reshape(pixel_color, (x_width,y_width))
 
-	plt.figure(figsize=(x_width//20, y_width//20))
-	plt.title(f"{x_width}x{y_width}")
-	plt.imshow(reshaped_screen, interpolation="none")
-	plt.show()
+	return reshaped_screen
   
+def convert2HSV(arr):
+    """
+    Takes in an array and maps the iteration values to some HSV
+    value, as determined by the exponential mapping formula.
+    
+	Takes in an array, returns an array
+    """
+    iter_vals_flattened = arr.flatten()
+    hue_vals = ((iter_vals_flattened/MAX_ITER * 255)**1.5)%255
+    sat_vals = np.ones(hue_vals.shape)*255
+    val_vals = iter_vals_flattened/MAX_ITER * 255
+    hsv_vals = np.dstack((hue_vals, sat_vals, val_vals)).reshape((*arr.shape, 3)).astype()
+    return hsv_vals
+
+
 start = time.time_ns()
 
-optimized_escape_time_alogrithm(200,200)
+raw_array = optimized_escape_time_alogrithm(WIDTH, HEIGHT)
+print(raw_array.shape)
 
 end = time.time_ns()
 
-print(f"Optimized time : {(end-start)/(1e9):1.3e} s")
+print(f"Generating the fractal took {(end-start)*1e-9:1.3e}s")
+
+start = time.time_ns()
+hsv_array = convert2HSV(raw_array)
+end = time.time_ns()
+
+print(f"Converting values to HSV took {(end-start)*1e-9:1.3e}s")
+# produce the HSV fractal
+
+start = time.time_ns()
+
+hsv_img = Image.fromarray(hsv_array, mode="HSV")
+
+# display the image
+hsv_img.show()
+end = time.time_ns()
+
+print(f"Converting array to image and displaying took {(end-start)*1e-9:1.3e}s")
